@@ -1,24 +1,105 @@
-const OWNER_EMAIL = "real.hypertech.inc@gmail.com";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creek Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --glass: rgba(255, 255, 255, 0.15); --border: rgba(255, 255, 255, 0.2); }
+        body { 
+            margin: 0; padding: 20px; font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh; color: white; display: flex; flex-direction: column; align-items: center;
+        }
+        .container {
+            width: 100%; max-width: 450px; background: var(--glass); backdrop-filter: blur(20px);
+            border-radius: 28px; border: 1px solid var(--border); padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            margin-top: 50px;
+        }
+        .role-badge {
+            display: inline-block; padding: 6px 16px; border-radius: 50px;
+            font-size: 12px; font-weight: 800; text-transform: uppercase;
+            margin-bottom: 25px; border: 1px solid var(--border);
+        }
+        .owner-badge { background: #3b82f6; color: white; }
+        .admin-badge { background: #10b981; color: white; }
+        .user-badge { background: #64748b; color: white; }
 
-function doGet(e) {
-  return HtmlService.createTemplateFromFile('index').evaluate()
-         .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-}
+        input {
+            width: 100%; box-sizing: border-box; padding: 18px; margin: 12px 0;
+            border-radius: 16px; border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2); color: white; font-size: 16px; outline: none;
+        }
+        button {
+            width: 100%; padding: 18px; border-radius: 16px; border: none;
+            background: white; color: #0f172a; font-weight: 700; font-size: 16px;
+            cursor: pointer; transition: 0.2s ease; margin-top: 10px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+        .log-box {
+            margin-top: 25px; font-size: 13px; background: rgba(0,0,0,0.3);
+            padding: 15px; border-radius: 16px; height: 120px; overflow-y: auto;
+            border: 1px solid var(--border); line-height: 1.6;
+        }
+        .user-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body>
 
-function processAction(command, userEmail) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const adminSheet = ss.getSheetByName("Admins");
-  const admins = adminSheet.getRange("A:A").getValues().flat();
-  
-  let role = "User";
-  if (userEmail === OWNER_EMAIL) role = "Owner";
-  else if (admins.includes(userEmail)) role = "Admin";
-  
-  // Logic: Only Owners can DELETE. Admins can BAN. Users can only VIEW.
-  if (role === "User" && (command.includes("BAN") || command.includes("DELETE"))) {
-    return "ACCESS DENIED: Insufficient Permissions";
-  }
-  
-  ss.getSheetByName("Requests").appendRow([new Date(), userEmail, role, command]);
-  return `Success: ${role} executed ${command}`;
-}
+    <div class="container">
+        <div id="roleBadge" class="role-badge user-badge">Checking Role...</div>
+        <h1 style="margin: 0; font-size: 28px;">Creek Hub</h1>
+        <p style="opacity: 0.6; margin-top: 5px;">Cloud Management Interface</p>
+        
+        <input type="text" id="userInput" placeholder="Command (e.g. BAN @ID, REBOOT)">
+        <button onclick="handleAction()">Execute Command</button>
+        
+        <div class="log-box" id="terminal">
+            [System] Initializing Creek connection...<br>
+            [System] Status: Waiting for user login.
+        </div>
+    </div>
+
+    <script>
+        const OWNER_EMAIL = "real.hypertech.inc@gmail.com";
+        // To simulate, we'll check a 'key'. In production, this would be your Google Login.
+        let currentRole = "User";
+
+        function setRole(email) {
+            const badge = document.getElementById('roleBadge');
+            if (email === OWNER_EMAIL) {
+                currentRole = "Owner";
+                badge.innerText = "OWNER ACCESS";
+                badge.className = "role-badge owner-badge";
+            } else {
+                currentRole = "User";
+                badge.innerText = "USER VIEW ONLY";
+                badge.className = "role-badge user-badge";
+            }
+        }
+
+        // Initialize with Owner for you
+        setRole(OWNER_EMAIL);
+
+        function handleAction() {
+            const cmd = document.getElementById('userInput').value;
+            const term = document.getElementById('terminal');
+            
+            if (currentRole === "User") {
+                term.innerHTML += `<br><span style="color:#ef4444">[Denied] Insufficient permissions for "${cmd}"</span>`;
+                return;
+            }
+
+            term.innerHTML += `<br><span style="color:#3b82f6">[${currentRole}] Executing: ${cmd}...</span>`;
+            
+            // This is where you would call your Tasker/Sheet API
+            // For now, it's a visual feedback
+            setTimeout(() => {
+                term.innerHTML += `<br><span style="color:#10b981">[Success] Command synced to Root.</span>`;
+                document.getElementById('userInput').value = "";
+            }, 800);
+        }
+    </script>
+</body>
+</html>
