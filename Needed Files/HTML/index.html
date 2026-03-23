@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CREEK SYSTEM v3.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .box { border: 1px solid #0f0; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        button { background: #0f0; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #111; border: 1px solid #0f0; color: #0f0; }
+        h2 { border-bottom: 1px solid #0f0; }
+    </style>
+</head>
+<body>
+    <h2>🚀 CREEK COMMAND</h2>
+    <p>Device: Redmi 15 4G | HyperOS 3.0</p>
+    
+    <div class="box">
+        <label>ACTION COMMAND:</label><br>
+        <input type="text" id="cmd" placeholder="e.g. BAN DeviceID-123">
+        <button onclick="sendCommand()">EXECUTE AI COMMAND</button>
+    </div>
+
+    <div id="status" style="margin-top: 20px; font-size: 12px; color: #888;">System Ready...</div>
+
+    <script>
+        async function sendCommand() {
+            const cmd = document.getElementById('cmd').value;
+            const status = document.getElementById('status');
+            const url = "PASTE_YOUR_WEB_APP_URL_HERE"; // Put your URL here
+
+            status.innerText = "Sending to Creek Cloud...";
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify({ "command": cmd })
+                });
+                status.innerText = "Success: Command Logged to Sheet.";
+            } catch (error) {
+                status.innerText = "Error: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
+
