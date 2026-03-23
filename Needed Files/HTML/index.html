@@ -1,47 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CREEK SYSTEM v3.0</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREEK HUB - HYPEROS 3.0</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-        .box { border: 1px solid #0f0; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
-        button { background: #0f0; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; }
-        input { width: 90%; padding: 10px; margin: 10px 0; background: #111; border: 1px solid #0f0; color: #0f0; }
-        h2 { border-bottom: 1px solid #0f0; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 15px; }
+        .header { border: 2px dashed #0f0; padding: 10px; margin-bottom: 20px; text-align: center; }
+        .role-tag { font-size: 10px; padding: 3px 8px; border-radius: 10px; float: right; }
+        .admin { background: #f00; color: #fff; } /* Red for Admin */
+        .owner { background: #00f; color: #fff; } /* Blue for Owner */
+        .user { background: #444; color: #fff; }  /* Gray for User */
+        input, button { width: 100%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid #0f0; color: #0f0; }
+        button { background: #0f0; color: #000; font-weight: bold; }
+        #console { height: 150px; overflow-y: auto; font-size: 12px; border-top: 1px solid #333; padding-top: 10px; }
     </style>
 </head>
 <body>
-    <h2>🚀 CREEK COMMAND</h2>
-    <p>Device: Redmi 15 4G | HyperOS 3.0</p>
-    
-    <div class="box">
-        <label>ACTION COMMAND:</label><br>
-        <input type="text" id="cmd" placeholder="e.g. BAN DeviceID-123">
-        <button onclick="sendCommand()">EXECUTE AI COMMAND</button>
-    </div>
 
-    <div id="status" style="margin-top: 20px; font-size: 12px; color: #888;">System Ready...</div>
+<div class="header">
+    <strong>CREEK SYSTEM v3.0</strong><br>
+    <small>Root: Redmi 15 | Android 16</small>
+</div>
 
-    <script>
-        async function sendCommand() {
-            const cmd = document.getElementById('cmd').value;
-            const status = document.getElementById('status');
-            const url = "PASTE_YOUR_WEB_APP_URL_HERE"; // Put your URL here
+<div id="auth-box">
+    <input type="password" id="key" placeholder="Enter Access Key (Admin/Owner)">
+    <button onclick="checkAccess()">LOGIN TO CREEK</button>
+</div>
 
-            status.innerText = "Sending to Creek Cloud...";
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: JSON.stringify({ "command": cmd })
-                });
-                status.innerText = "Success: Command Logged to Sheet.";
-            } catch (error) {
-                status.innerText = "Error: " + error;
-            }
+<div id="main-ui" style="display:none;">
+    <div id="role-display">Role: <span id="current-role">None</span></div>
+    <hr>
+    <input type="text" id="cmd" placeholder="COMMAND (e.g. KICK @ID44)">
+    <button onclick="execute()">EXECUTE ROOT COMMAND</button>
+    <div id="console">>> System Ready.</div>
+</div>
+
+<script>
+    const OWNER_EMAIL = "real.hypertech.inc@gmail.com";
+    const API_KEY = "AIzaSyCyG5yapEekcUk3hNRlB_qQX2N7Z2r4PhI"; // Your key
+
+    function checkAccess() {
+        const pass = document.getElementById('key').value;
+        const ui = document.getElementById('main-ui');
+        const auth = document.getElementById('auth-box');
+        
+        // Split Logic
+        if(pass === "ROOT_ADMIN_99") { // You define these passwords
+            document.getElementById('current-role').innerText = "ADMIN";
+            ui.style.display = "block"; auth.style.display = "none";
+        } else if (pass === "OWNER_CREEK") {
+            document.getElementById('current-role').innerText = "OWNER";
+            ui.style.display = "block"; auth.style.display = "none";
+        } else {
+            alert("ACCESS DENIED: USER LOGIN NOT ALLOWED IN ROOT HUB");
         }
-    </script>
+    }
+
+    async function execute() {
+        const cmd = document.getElementById('cmd').value;
+        const con = document.getElementById('console');
+        con.innerHTML += `<br>> Processing: ${cmd}...`;
+
+        const prompt = `System: Creek Hotspot Manager. Role: ${document.getElementById('current-role').innerText}. Command: ${cmd}`;
+        
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            con.innerHTML += `<br>>> Result: ${data.candidates[0].content.parts[0].text}`;
+        } catch (e) { con.innerHTML += `<br>!! ROOT ERROR: FAILED TO CONNECT`; }
+    }
+</script>
 </body>
 </html>
-
